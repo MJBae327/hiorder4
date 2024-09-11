@@ -2,9 +2,9 @@
     <v-card style="width:450px; height:100%;" outlined>
         <template slot="progress">
             <v-progress-linear
-                    color="primary-darker-1"
-                    height="10"
-                    indeterminate
+                color="primary-darker-1"
+                height="10"
+                indeterminate
             ></v-progress-linear>
         </template>
 
@@ -17,9 +17,37 @@
 
         <v-card-text>
             <String label="Name" v-model="value.name" :editMode="editMode" :inputUI="''"/>
+
             <Number label="Price" v-model="value.price" :editMode="editMode" :inputUI="''"/>
-            <Number label="InventoryId" v-model="value.inventoryId" :editMode="editMode" :inputUI="''"/>
-            <Number label="IngredientUnit" v-model="value.ingredientUnit" :editMode="editMode" :inputUI="''"/>
+
+            <!-- InventoryId 리스트 입력 -->
+            <div>
+                <label>InventoryId</label>
+                <div v-for="(id, index) in value.inventoryId" :key="index">
+                    <v-text-field
+                        v-model="value.inventoryId[index]"
+                        label="Inventory Id"
+                        @click:append="removeInventoryId(index)"
+                        v-if="editMode"
+                    ></v-text-field>
+                </div>
+                <v-btn color="primary" text @click="addInventoryId" v-if="editMode">Add Inventory Id</v-btn>
+            </div>
+
+            <!-- IngredientUnit 리스트 입력 -->
+            <div>
+                <label>IngredientUnit</label>
+                <div v-for="(unit, index) in value.ingredientUnit" :key="index">
+                    <v-text-field
+                        v-model="value.ingredientUnit[index]"
+                        label="Ingredient Unit"
+                        @click:append="removeIngredientUnit(index)"
+                        v-if="editMode"
+                    ></v-text-field>
+                </div>
+                <v-btn color="primary" text @click="addIngredientUnit" v-if="editMode">Add Ingredient Unit</v-btn>
+            </div>
+
         </v-card-text>
 
         <v-card-actions>
@@ -50,30 +78,18 @@
                 <v-btn
                     color="primary"
                     text
-                    @click="save"
+                    @click="remove"
                 >
                     DeleteMenu
                 </v-btn>
                 <v-btn
                     color="primary"
                     text
-                    @click="remove"
-                    v-if="!editMode"
-                >
-                    삭제
-                </v-btn>
-                <v-btn
-                    color="primary"
-                    text
                     @click="editMode = false"
-                    v-if="editMode && !isNew"
                 >
                     취소
                 </v-btn>
             </div>
-        </v-card-actions>
-        <v-card-actions>
-            <v-spacer></v-spacer>
         </v-card-actions>
 
         <v-snackbar
@@ -88,17 +104,14 @@
             </v-btn>
         </v-snackbar>
     </v-card>
-
 </template>
 
 <script>
     const axios = require('axios').default;
 
-
     export default {
         name: 'MenuMenu',
-        components:{
-        },
+        components: {},
         props: {
             value: [Object, String, Number, Boolean, Array],
             editMode: Boolean,
@@ -112,53 +125,29 @@
                 text: '',
             },
         }),
-	async created() {
+        async created() {
         },
         methods: {
             decode(value) {
                 return decodeURIComponent(value);
             },
-            selectFile(){
-                if(this.editMode == false) {
-                    return false;
-                }
-                var me = this
-                var input = document.createElement("input");
-                input.type = "file";
-                input.accept = "image/*";
-                input.id = "uploadInput";
-                
-                input.click();
-                input.onchange = function (event) {
-                    var file = event.target.files[0]
-                    var reader = new FileReader();
-
-                    reader.onload = function () {
-                        var result = reader.result;
-                        me.imageUrl = result;
-                        me.value.photo = result;
-                        
-                    };
-                    reader.readAsDataURL( file );
-                };
-            },
             edit() {
                 this.editMode = true;
             },
-            async save(){
+            async save() {
                 try {
-                    var temp = null;
+                    let temp = null;
 
-                    if(!this.offline) {
-                        if(this.isNew) {
-                            temp = await axios.post(axios.fixUrl('/menus'), this.value)
+                    if (!this.offline) {
+                        if (this.isNew) {
+                            temp = await axios.post(axios.fixUrl('/menus'), this.value);
                         } else {
-                            temp = await axios.put(axios.fixUrl(this.value._links.self.href), this.value)
+                            temp = await axios.put(axios.fixUrl(this.value._links.self.href), this.value);
                         }
                     }
 
-                    if(this.value!=null) {
-                        for(var k in temp.data) this.value[k]=temp.data[k];
+                    if (this.value != null) {
+                        for (let k in temp.data) this.value[k] = temp.data[k];
                     } else {
                         this.value = temp.data;
                     }
@@ -172,22 +161,22 @@
                         this.$emit('edit', this.value);
                     }
 
-                    location.reload()
+                    location.reload();
 
-                } catch(e) {
-                    this.snackbar.status = true
-                    if(e.response && e.response.data.message) {
-                        this.snackbar.text = e.response.data.message
+                } catch (e) {
+                    this.snackbar.status = true;
+                    if (e.response && e.response.data.message) {
+                        this.snackbar.text = e.response.data.message;
                     } else {
-                        this.snackbar.text = e
+                        this.snackbar.text = e;
                     }
                 }
-                
+
             },
-            async remove(){
+            async remove() {
                 try {
                     if (!this.offline) {
-                        await axios.delete(axios.fixUrl(this.value._links.self.href))
+                        await axios.delete(axios.fixUrl(this.value._links.self.href));
                     }
 
                     this.editMode = false;
@@ -196,19 +185,31 @@
                     this.$emit('input', this.value);
                     this.$emit('delete', this.value);
 
-                } catch(e) {
-                    this.snackbar.status = true
-                    if(e.response && e.response.data.message) {
-                        this.snackbar.text = e.response.data.message
+                } catch (e) {
+                    this.snackbar.status = true;
+                    if (e.response && e.response.data.message) {
+                        this.snackbar.text = e.response.data.message;
                     } else {
-                        this.snackbar.text = e
+                        this.snackbar.text = e;
                     }
                 }
             },
-            change(){
-                this.$emit('input', this.value);
+            // InventoryId 리스트 관리
+            addInventoryId() {
+                this.value.inventoryId.push('');
+            },
+            removeInventoryId(index) {
+                this.value.inventoryId.splice(index, 1);
+            },
+            // IngredientUnit 리스트 관리
+            addIngredientUnit() {
+                this.value.ingredientUnit.push('');
+            },
+            removeIngredientUnit(index) {
+                this.value.ingredientUnit.splice(index, 1);
             },
         },
-    }
+    };
 </script>
+
 
