@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: menu
-          image: "username/menu:latest"
+          image: "mjbae327/menu:latest"
           ports:
             - containerPort: 8080
           readinessProbe:
