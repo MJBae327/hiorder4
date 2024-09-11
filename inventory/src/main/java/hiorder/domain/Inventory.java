@@ -2,12 +2,10 @@ package hiorder.domain;
 
 import hiorder.InventoryApplication;
 import hiorder.domain.OutOfStock;
-import hiorder.domain.StockCreated;
 import hiorder.domain.StockDecreased;
+import hiorder.domain.StockCreated;
 import hiorder.domain.StockDeleted;
 import hiorder.domain.StockUpdated;
-import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 import lombok.Data;
@@ -34,14 +32,21 @@ public class Inventory {
         StockCreated stockCreated = new StockCreated(this);
         stockCreated.publishAfterCommit();
 
-        OutOfStock outOfStock = new OutOfStock(this);
-        outOfStock.publishAfterCommit();
+        if (this.quantity <= 0) {
+            OutOfStock outOfStock = new OutOfStock(this);
+            outOfStock.publishAfterCommit();
+        }
     }
 
     @PostUpdate
     public void onPostUpdate() {
         StockUpdated stockUpdated = new StockUpdated(this);
         stockUpdated.publishAfterCommit();
+
+        if (this.quantity <= 0) {
+            OutOfStock outOfStock = new OutOfStock(this);
+            outOfStock.publishAfterCommit();
+        }
     }
 
     @PreRemove
@@ -58,32 +63,33 @@ public class Inventory {
     }
 
     //<<< Clean Arch / Port Method
-    public static void decreaseStock(OrderCreated orderCreated) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
-        Inventory inventory = new Inventory();
-        repository().save(inventory);
-
-        StockDecreased stockDecreased = new StockDecreased(inventory);
-        stockDecreased.publishAfterCommit();
-        */
-
-        /** Example 2:  finding and process
-        
-        repository().findById(orderCreated.get???()).ifPresent(inventory->{
+    public static void decreaseStock(OrderCreated orderCreated, List<Long> inventoryIds, List<Integer> ingredientUnits) {
+        // OrderCreated 이벤트에서 해당 menuId에 해당하는 재료들을 찾아서 재고를 감소
+        for (int i = 0; i < inventoryIds.size(); i++) {
+            Long inventoryId = inventoryIds.get(i);
+            Integer ingredientUnit = ingredientUnits.get(i);
             
-            inventory // do something
-            repository().save(inventory);
+            // 해당 inventoryId에 해당하는 재고를 찾음
+            repository().findById(inventoryId).ifPresent(inventory -> {
+                // 재고를 감소시킴
+                inventory.setQuantity(inventory.getQuantity() - ingredientUnit * orderCreated.getQuantity());
 
-            StockDecreased stockDecreased = new StockDecreased(inventory);
-            stockDecreased.publishAfterCommit();
+                // 재고가 감소한 후 처리
+                if (inventory.getQuantity() <= 0) {
+                    inventory.setQuantity(0);  // 재고가 음수로 내려가는 것을 방지
+                    OutOfStock outOfStock = new OutOfStock(inventory);
+                    outOfStock.publishAfterCommit();
+                }
 
-         });
-        */
+                // 변경된 재고를 저장
+                repository().save(inventory);
 
+                // 재고 감소 이벤트 발행
+                StockDecreased stockDecreased = new StockDecreased(inventory);
+                stockDecreased.publishAfterCommit();
+            });
+        }
     }
     //>>> Clean Arch / Port Method
-
 }
 //>>> DDD / Aggregate Root
