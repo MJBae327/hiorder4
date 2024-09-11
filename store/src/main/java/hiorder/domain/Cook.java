@@ -41,7 +41,7 @@ public class Cook {
 
     //<<< Clean Arch / Port Method
     public void isAccept(IsAcceptCommand isAcceptCommand) {
-        //implement business logic here:
+        // Implement business logic here:
 
         Accepted accepted = new Accepted(this);
         accepted.publishAfterCommit();
@@ -50,7 +50,7 @@ public class Cook {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public void start() {
-        //implement business logic here:
+        // Implement business logic here:
 
         CookStarted cookStarted = new CookStarted(this);
         cookStarted.publishAfterCommit();
@@ -59,7 +59,7 @@ public class Cook {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public void finish() {
-        //implement business logic here:
+        // Implement business logic here:
 
         CookFinished cookFinished = new CookFinished(this);
         cookFinished.publishAfterCommit();
@@ -69,27 +69,17 @@ public class Cook {
 
     //<<< Clean Arch / Port Method
     public static void createCookInfo(OrderCreated orderCreated) {
-        //implement business logic here:
-
-        /** Example 1:  new item 
+        // 새로운 Cook 객체 생성 및 OrderCreated 이벤트로부터 데이터 설정
         Cook cook = new Cook();
+        cook.setTableId(orderCreated.getTableId());
+        cook.setMenuId(orderCreated.getMenuId().longValue());  // 필요 시 형 변환
+        cook.setQuantity(orderCreated.getQuantity());
+        cook.setStatus("CREATED"); // 초기 상태 설정
+
+        // Cook 객체 저장
         repository().save(cook);
-
-        */
-
-        /** Example 2:  finding and process
-        
-        repository().findById(orderCreated.get???()).ifPresent(cook->{
-            
-            cook // do something
-            repository().save(cook);
-
-
-         });
-        */
-
     }
     //>>> Clean Arch / Port Method
-
 }
 //>>> DDD / Aggregate Root
+

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hiorder.config.kafka.KafkaProcessor;
 import hiorder.domain.*;
-import javax.naming.NameParser;
-import javax.naming.NameParser;
 import javax.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
@@ -31,12 +29,11 @@ public class PolicyHandler {
         @Payload OrderCreated orderCreated
     ) {
         OrderCreated event = orderCreated;
-        System.out.println(
-            "\n\n##### listener CreateCookInfo : " + orderCreated + "\n\n"
-        );
+        System.out.println("\n\n##### listener CreateCookInfo : " + orderCreated + "\n\n");
 
-        // Sample Logic //
+        // Cook 객체 생성 로직 호출
         Cook.createCookInfo(event);
     }
 }
 //>>> Clean Arch / Inbound Adaptor
+
