@@ -82,3 +82,6 @@ spring:
           contentType: application/json
 
 
+api:
+  url:
+    menu: http://gateway:8080/menus
