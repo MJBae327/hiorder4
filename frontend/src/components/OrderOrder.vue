@@ -136,7 +136,16 @@
         >
           수정
         </v-btn>
-        <div v-else>
+        <v-btn
+          color="success"
+          class="mx-2"
+          @click="$emit('process', value)"
+          :disabled="value.status === 'COMPLETED' || value.isOrderable === 'NO'"
+          v-if="!editMode"
+        >
+          Process Order
+        </v-btn>
+        <div v-if="editMode">
           <v-btn
             color="primary"
             class="mx-2"

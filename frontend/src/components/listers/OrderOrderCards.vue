@@ -31,7 +31,7 @@
                             @add="append" v-if="tick"/>
 
                     <v-btn
-                            style="postition:absolute; top:2%; right:2%"
+                            style="position:absolute; top:2%; right:2%"
                             @click="closeDialog()"
                             depressed
                             icon 
@@ -74,13 +74,20 @@
             </div>
         </v-col>
         <v-row>
-            <OrderOrder :offline="offline" class="video-card" v-for="(value, index) in values" v-model="values[index]" v-bind:key="index" @delete="remove"/>
+            <OrderOrder 
+                :offline="offline" 
+                class="video-card" 
+                v-for="(value, index) in values" 
+                v-model="values[index]" 
+                v-bind:key="index" 
+                @delete="remove"
+                @process="processOrder"
+            />
         </v-row>
     </div>
 </template>
 
 <script>
-
     const axios = require('axios').default;
     import OrderOrder from './../OrderOrder.vue';
 
@@ -119,7 +126,7 @@
                 'isOrderable': '',
             }
         },
-        methods:{
+        methods: {
             closeDialog(){
                 this.openDialog = false
             },
@@ -148,10 +155,38 @@
                     this.$emit('input', this.values);
                 }
             },
+            async processOrder(order) {
+                try {
+                    // 재고 확인
+                    const inventoryResponse = await axios.get(axios.fixUrl(`/inventories/search/findByMenuId?menuId=${order.menuId}`));
+                    const inventory = inventoryResponse.data._embedded.inventories[0];
+                    
+                    if (inventory && inventory.quantity >= order.quantity) {
+                        // 재고 업데이트
+                        inventory.quantity -= order.quantity;
+                        await axios.put(axios.fixUrl(`/inventories/${inventory.id}`), inventory);
+                        
+                        // 주문 상태 업데이트
+                        order.status = 'COMPLETED';
+                        order.isOrderable = inventory.quantity > 0 ? 'YES' : 'NO';
+                        await axios.put(axios.fixUrl(order._links.self.href), order);
+                        
+                        // 주문 목록 새로고침
+                        const updatedOrders = await axios.get(axios.fixUrl('/orders'));
+                        this.values = updatedOrders.data._embedded.orders;
+                        
+                        alert('Order processed successfully.');
+                    } else {
+                        alert('Not enough inventory to process this order.');
+                    }
+                } catch (error) {
+                    console.error('Error processing order:', error);
+                    alert('An error occurred while processing the order.');
+                }
+            },
         }
     };
 </script>
-
 
 <style>
     .video-card {
@@ -161,4 +196,3 @@
         margin-bottom:50px;
     }
 </style>
-

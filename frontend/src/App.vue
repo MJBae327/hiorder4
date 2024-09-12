@@ -1,53 +1,51 @@
 <template>
-    <v-app id="inspire">
-        <SNSApp />
-    </v-app>
+  <v-app id="inspire">
+    <header>
+      <h1>HiOrder</h1>
+      <p>가게의 주문과 재고 관리를 간편하게</p>
+    </header>
+
+    <router-view></router-view>
+
+    <footer class="footer">
+      <p>&copy; 2024 HiOrder. All rights reserved.</p>
+    </footer>
+  </v-app>
 </template>
 
 <script>
-import SNSApp from './SNSApp.vue'
-
 export default {
-
-    components: {
-        SNSApp
-    },
-    name: "App",
-    data: () => ({
-        useComponent: "",
-        drawer: true,
-        components: [],
-        sideBar: true,
-        urlPath: null,
-    }),
-    
-    async created() {
-      var path = document.location.href.split("#/")
-      this.urlPath = path[1];
-
-    },
-
-    mounted() {
-        var me = this;
-        me.components = this.$ManagerLists;
-    },
-
-    methods: {
-        openSideBar(){
-            this.sideBar = !this.sideBar
-        },
-        changeUrl() {
-            var path = document.location.href.split("#/")
-            this.urlPath = path[1];
-        },
-        goHome() {
-            this.urlPath = null;
-        },
-    }
-};
+  name: 'App',
+}
 </script>
-<style>
-*{
-    font-family:  !important;
+
+<style scoped>
+/* 헤더와 푸터 스타일만 유지 */
+header {
+  background-color: #009688;
+  color: #fff;
+  padding: 40px 20px;
+  margin-bottom: 30px;
+}
+header h1 {
+  margin: 0;
+  font-size: 2.8em;
+  font-weight: bold;
+}
+header p {
+  font-size: 1.2em;
+  margin: 10px 0;
+}
+.footer {
+  background-color: #00796b;
+  color: #fff;
+  padding: 20px;
+  position: relative;
+  bottom: 0;
+  width: 100%;
+}
+.footer p {
+  margin: 0;
+  font-size: 1em;
 }
 </style>
