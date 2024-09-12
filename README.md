@@ -57,14 +57,17 @@
 
 ## MSA 설계
 ### Event Storming
-![경쟁사 비교](ReadmeAssets/경쟁사%20비교.png) 
+![eventstorming](ReadmeAssets/1.%20event%20storming.png)
 ### Command 및 Actor 부착
+![commandandactor](ReadmeAssets/2.%20command%20and%20actor.png)
 ### Bounded Context 묶기
+![boundedcontext](ReadmeAssets/3.%20bounded%20context.png)
 ### Aggregate 묶기
+![aggregate](ReadmeAssets/4.%20aggregate.png)
 ### Policy 부착
+![policy](ReadmeAssets/5.%20policy.png)
 ### Context Mapping
-
-
+![contextmapping](ReadmeAssets/6.%20context%20mapping.png)
 
 ## Model
 www.msaez.io/#/storming/179681502_es_hiorder_20240910
