@@ -1,6 +1,13 @@
 <template>
   <v-app id="inspire">
     <header>
+      <v-btn
+        icon
+        @click="$router.push('/')"
+        style="position: absolute; top: 40px; left: 20px;"
+      >
+        <v-icon>mdi-home</v-icon>
+      </v-btn>
       <h1>HiOrder</h1>
       <p>가게의 주문과 재고 관리를 간편하게</p>
     </header>

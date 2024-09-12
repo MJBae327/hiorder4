@@ -4,7 +4,7 @@
         <h2>편리한 주문 관리 시스템</h2>
         <p>비즈니스에 맞춘 완벽한 주문 솔루션을 만나보세요.</p>
         <!-- 메뉴로 이동 -->
-        <button @click="navigateTo('/menus/menus')" class="cta-button">메뉴 보기</button>
+        <button @click="navigateTo('/orders/orders')" class="cta-button">주문하기</button>
       </div>
   
       <div class="features">
@@ -14,7 +14,7 @@
         <div class="feature">
           <div class="feature-icon">📋</div>
           <div class="feature-text">
-            <button @click="navigateTo('/menus/menus')" class="cta-button">메뉴 관리</button>
+            <button @click="navigateTo('/menus/menus')" class="cta-button">메뉴관리</button>
             <p>직관적인 인터페이스로 메뉴를 쉽게 추가, 수정, 삭제할 수 있습니다.</p>
           </div>
         </div>
@@ -23,7 +23,7 @@
         <div class="feature">
           <div class="feature-icon">📈</div>
           <div class="feature-text">
-            <button @click="navigateTo('/orders/orders')" class="cta-button">주문 관리</button>
+            <button @click="navigateTo('/stores/cooks')" class="cta-button">주문관리</button>
             <p>주문 상태를 실시간으로 확인하고 관리할 수 있습니다.</p>
           </div>
         </div>
@@ -32,7 +32,7 @@
         <div class="feature">
           <div class="feature-icon">📦</div>
           <div class="feature-text">
-            <button @click="navigateTo('/inventories/inventories')" class="cta-button">재고 관리</button>
+            <button @click="navigateTo('/inventories/inventories')" class="cta-button">재고관리</button>
             <p>재고를 쉽게 추적하고, 부족할 때 알림을 받을 수 있습니다.</p>
           </div>
         </div>
@@ -41,7 +41,7 @@
         <div class="feature">
           <div class="feature-icon">🔥</div>
           <div class="feature-text">
-            <button @click="showHotMenu" class="cta-button">지금 가장 핫한 메뉴 보기</button>
+            <button @click="showHotMenu" class="cta-button">지금 핫한 메뉴 보기</button>
             <p>가장 많이 주문된 메뉴를 한눈에 확인해 보세요.</p>
           </div>
         </div>

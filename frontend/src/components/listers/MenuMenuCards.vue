@@ -1,23 +1,13 @@
 <template>
     <div>
-        <v-card
-            class="mx-auto"
-            outlined
-            color="primary"
-            style="padding:10px 0px 10px 0px; margin-bottom:40px;"
-        >
             <v-row>
                 <v-list-item class="d-flex">
-                    <v-list-item-avatar
-                        size="70"
-                        class="border-color"
-                    >
-                    </v-list-item-avatar>
-                    <h1 class="align-self-center ml-3">Menu</h1>
+                    
+                    <h1 class="align-self-center ml-3" style="font-size: 36px;">Menu</h1>
                     <div class="secondary-text-color" style="margin-left:30px;"></div>
                 </v-list-item>
             </v-row>
-        </v-card>
+        
         <v-col style="margin-bottom:40px;">
             <div class="text-center">
                 <v-dialog

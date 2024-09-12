@@ -69,93 +69,113 @@
 ### Context Mapping
 ![contextmapping](ReadmeAssets/6.%20context%20mapping.png)
 
-## Model
-www.msaez.io/#/storming/179681502_es_hiorder_20240910
+## 기술스택
+### Frontend
 
-## Before Running Services
-### Make sure there is a Kafka server running
-```
-cd kafka
-docker-compose up
-```
-- Check the Kafka messages:
-```
-cd infra
-docker-compose exec -it kafka /bin/bash
-cd /bin
-./kafka-console-consumer --bootstrap-server localhost:9092 --topic
-```
+<img src="https://img.shields.io/badge/vue.js-4FC08D?style=for-the-badge&logo=vue.js&logoColor=black"> <img src="https://img.shields.io/badge/node.js-339933?style=for-the-badge&logo=Node.js&logoColor=white"> <img src="https://img.shields.io/badge/Css-1572B6?style=for-the-badge&logo=Css&logoColor=white">
 
-## Run the backend micro-services
-See the README.md files inside the each microservices directory:
+### Backend
 
-- order
-- menu
-- store
-- inventory
+<img src="https://img.shields.io/badge/Java-007396?style=for-the-badge&logo=Java&logoColor=white"> <img src="https://img.shields.io/badge/Maven-C71A36?style=for-the-badge&logo=ApacheMaven&logoColor=white"> <img src="https://img.shields.io/badge/springboot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white"> 
+
+### Database
+
+<img src="https://img.shields.io/badge/h2database-009?style=for-the-badge&logo=h2database&logoColor=white">
+
+### DevOps
+
+<img src="https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=Ubuntu&logoColor=white"> <img src="https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=GitHub&logoColor=white"> <img src="https://img.shields.io/badge/gitpod-FFAE33?style=for-the-badge&logo=gitpod&logoColor=white"> <img src="https://img.shields.io/badge/microsoft Azure-2496ED?style=for-the-badge&logo=Microsoft Azure&logoColor=white"> <img src="https://img.shields.io/badge/Jenkins-D24939?style=for-the-badge&logo=Jenkins&logoColor=white"> <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=Docker&logoColor=white"> <img src="https://img.shields.io/badge/kubernetes-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white"> <img src="https://img.shields.io/badge/kafka-231F20?style=for-the-badge&logo=apachekafka&logoColor=white">
 
 
-## Run API Gateway (Spring Gateway)
+## Jenkins Pipeline Script
 ```
-cd gateway
-mvn spring-boot:run
-```
-
-## Test by API
-- order
-```
- http :8088/orders id="id" numberOfPeople="numberOfPeople" tableId="tableId" orderTime="orderTime" menuId="menuId" quantity="quantity" price="price" status="status" isOrderable="isOrderable" 
-```
-- menu
-```
- http :8088/menus id="id" name="name" price="price" inventoryId="inventoryId" ingredientUnit="ingredientUnit" 
-```
-- store
-```
- http :8088/cooks id="id" tableId="tableId" menuId="menuId" quantity="quantity" status="status" 
-```
-- inventory
-```
- http :8088/inventories id="id" name="name" quantity="quantity" 
-```
-
-
-## Run the frontend
-```
-cd frontend
-npm i
-npm run serve
-```
-
-## Test by UI
-Open a browser to localhost:8088
-
-## Required Utilities
-
-- httpie (alternative for curl / POSTMAN) and network utils
-```
-sudo apt-get update
-sudo apt-get install net-tools
-sudo apt install iputils-ping
-pip install httpie
-```
-
-- kubernetes utilities (kubectl)
-```
-curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-```
-
-- aws cli (aws)
-```
-curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-unzip awscliv2.zip
-sudo ./aws/install
-```
-
-- eksctl 
-```
-curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-sudo mv /tmp/eksctl /usr/local/bin
-```
-
+pipeline {
+    agent any
+    tools {
+        maven 'Maven 3.6.3'
+        nodejs 'Node 14.x'
+    }
+    environment {
+        REPO_URL = 'https://github.com/jaeungleee/hiorder4.git'
+        BRANCH = 'main'
+        DOCKER_REGISTRY = 'mjbae327'
+        DOCKER_CREDENTIALS = 'docker-hub-credentials'
+        KUBECONFIG = '/root/.kube/config'
+    }
+    stages {
+        stage('Clone Repository') {
+            steps {
+                git branch: "${BRANCH}", url: "${REPO_URL}"
+            }
+        }
+        stage('Build & Test Microservices') {
+            steps {
+                script {
+                    def backendServices = ['order', 'menu', 'store', 'inventory', 'gateway']
+                    for (service in backendServices) {
+                        dir(service) {
+                            sh 'mvn clean package'
+                        }
+                    }
+                    
+                    dir('frontend') {
+                        sh 'npm install'
+                        sh 'npm run build'
+                    }
+                }
+            }
+        }
+        stage('Build Docker Images') {
+            steps {
+                script {
+                    def services = ['order', 'menu', 'store', 'inventory', 'gateway', 'frontend']
+                    for (service in services) {
+                        dir(service) {
+                            sh "docker build -t ${DOCKER_REGISTRY}/${service}:latest ."
+                            
+                            withCredentials([usernamePassword(credentialsId: "${DOCKER_CREDENTIALS}", passwordVariable: 'ACCESS_TOKEN', usernameVariable: 'USERNAME')]) {
+                                sh "echo $ACCESS_TOKEN | docker login -u $USERNAME --password-stdin"
+                                sh "docker push ${DOCKER_REGISTRY}/${service}:latest"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        stage('Cleanup Old Resources') {
+            steps {
+                script {
+                    def services = ['frontend', 'gateway', 'inventory', 'menu', 'order', 'store']
+                    for (service in services) {
+                        sh "kubectl delete deployment ${service} --ignore-not-found=true --kubeconfig=${KUBECONFIG}"
+                        sh "kubectl delete service ${service} --ignore-not-found=true --kubeconfig=${KUBECONFIG}"
+                    }
+                }
+            }
+        }
+        stage('Deploy to Kubernetes') {
+            steps {
+                script {
+                    def services = ['frontend', 'gateway', 'inventory', 'menu', 'order', 'store']
+                    for (service in services) {
+                        dir("${service}/kubernetes") {
+                            sh "kubectl apply -f deployment.yaml --kubeconfig=${KUBECONFIG}"
+                            sh "kubectl apply -f service.yaml --kubeconfig=${KUBECONFIG}"
+                        }
+                    }
+                }
+            }
+        }
+    }
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            echo '배포가 성공적으로 완료되었습니다!'
+        }
+        failure {
+            echo '배포 중 오류가 발생했습니다.'
+        }
+    }
+}

@@ -1,41 +1,32 @@
 <template>
     <div>
-        <v-card
-            class="mx-auto"
-            outlined
-            color="primary"
-            style="padding:10px 0px 10px 0px; margin-bottom:40px;"
-        >
+        
             <v-row>
                 <v-list-item class="d-flex">
-                    <v-list-item-avatar
-                        size="70"
-                        class="border-color"
-                    >
-                    </v-list-item-avatar>
-                    <h1 class="align-self-center ml-3">Inventory</h1>
+                    
+                    <h1 class="align-self-center ml-3" style="font-size: 36px;">Inventory</h1>
                     <div class="secondary-text-color" style="margin-left:30px;"></div>
                 </v-list-item>
             </v-row>
-        </v-card>
+        
         <v-col style="margin-bottom:40px;">
             <div class="text-center">
                 <v-dialog
-                        v-model="openDialog"
-                        width="332.5"
-                        fullscreen
-                        hide-overlay
-                        transition="dialog-bottom-transition"
+                    v-model="openDialog"
+                    width="332.5"
+                    fullscreen
+                    hide-overlay
+                    transition="dialog-bottom-transition"
                 >
                     <InventoryInventory :offline="offline" class="video-card" :isNew="true" :editMode="true" v-model="newValue" 
-                            @add="append" v-if="tick"/>
+                        @add="append" v-if="tick"/>
 
                     <v-btn
-                            style="postition:absolute; top:2%; right:2%"
-                            @click="closeDialog()"
-                            depressed
-                            icon 
-                            absolute
+                        style="position:absolute; top:2%; right:2%"
+                        @click="closeDialog()"
+                        depressed
+                        icon 
+                        absolute
                     >
                         <v-icon>mdi-close</v-icon>
                     </v-btn>
@@ -58,11 +49,10 @@
 
                         <v-card-actions>
                             <v-btn 
-                                v-on="on"
                                 class="mx-auto"
                                 outlined
                                 rounded
-                                @click="openDialog=true;"
+                                @click="openDialog = true"
                                 color="primary"
                                 style="font-weight:500; font-size:20px; padding:15px; border:solid 2px; max-width:250px; overflow:hidden"
                             >
@@ -80,7 +70,6 @@
 </template>
 
 <script>
-
     const axios = require('axios').default;
     import InventoryInventory from './../InventoryInventory.vue';
 
@@ -146,7 +135,6 @@
     };
 </script>
 
-
 <style>
     .video-card {
         width:300px; 
@@ -155,4 +143,3 @@
         margin-bottom:50px;
     }
 </style>
-
