@@ -58,8 +58,10 @@
 ## MSA 설계
 ### Event Storming
 ### Command 및 Actor 부착
-### Policy 부착
 ### Bounded Context 묶기
+### Aggregate 묶기
+### Policy 부착
+### Context Mapping
 
 
 

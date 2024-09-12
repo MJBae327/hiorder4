@@ -9,6 +9,7 @@ import hiorder.domain.StockUpdated;
 import java.util.List;
 import javax.persistence.*;
 import lombok.Data;
+import java.util.Optional; 
 
 @Entity
 @Table(name = "Inventory_table")
@@ -26,9 +27,6 @@ public class Inventory {
 
     @PostPersist
     public void onPostPersist() {
-        StockDecreased stockDecreased = new StockDecreased(this);
-        stockDecreased.publishAfterCommit();
-
         StockCreated stockCreated = new StockCreated(this);
         stockCreated.publishAfterCommit();
 
@@ -64,32 +62,49 @@ public class Inventory {
 
     //<<< Clean Arch / Port Method
     public static void decreaseStock(OrderCreated orderCreated, List<Long> inventoryIds, List<Integer> ingredientUnits) {
-        // OrderCreated 이벤트에서 해당 menuId에 해당하는 재료들을 찾아서 재고를 감소
         for (int i = 0; i < inventoryIds.size(); i++) {
             Long inventoryId = inventoryIds.get(i);
             Integer ingredientUnit = ingredientUnits.get(i);
             
             // 해당 inventoryId에 해당하는 재고를 찾음
-            repository().findById(inventoryId).ifPresent(inventory -> {
-                // 재고를 감소시킴
-                inventory.setQuantity(inventory.getQuantity() - ingredientUnit * orderCreated.getQuantity());
-
-                // 재고가 감소한 후 처리
-                if (inventory.getQuantity() <= 0) {
-                    inventory.setQuantity(0);  // 재고가 음수로 내려가는 것을 방지
-                    OutOfStock outOfStock = new OutOfStock(inventory);
-                    outOfStock.publishAfterCommit();
-                }
-
-                // 변경된 재고를 저장
-                repository().save(inventory);
-
-                // 재고 감소 이벤트 발행
-                StockDecreased stockDecreased = new StockDecreased(inventory);
-                stockDecreased.publishAfterCommit();
-            });
+            Optional<Inventory> optionalInventory = repository().findById(inventoryId);
+            
+            if (!optionalInventory.isPresent()) {
+                // 재고가 없는 경우 처리
+                System.out.println("Error: Inventory with ID " + inventoryId + " not found.");
+                // 여기서 에러 메시지를 반환하거나 이벤트 발행 가능
+                return; // 혹은 계속 진행할지 여부에 따라 처리
+            }
+    
+            Inventory inventory = optionalInventory.get();
+            
+            // 재고량이 부족한 경우
+            if (inventory.getQuantity() < ingredientUnit * orderCreated.getQuantity()) {
+                System.out.println("Error: Not enough stock for Inventory ID " + inventoryId + ". Available: " + inventory.getQuantity() + ", Required: " + (ingredientUnit * orderCreated.getQuantity()));
+                // 재고 부족 메시지 처리 및 이벤트 발행
+                return; // 부족한 경우 로직을 중단할지 계속할지 선택 가능
+            }
+    
+            // 재고를 감소시킴
+            inventory.setQuantity(inventory.getQuantity() - ingredientUnit * orderCreated.getQuantity());
+    
+            // 재고가 감소한 후 처리
+            if (inventory.getQuantity() <= 0) {
+                inventory.setQuantity(0);  // 재고가 음수로 내려가는 것을 방지
+                OutOfStock outOfStock = new OutOfStock(inventory);
+                outOfStock.publishAfterCommit();
+            }
+    
+            // 변경된 재고를 저장
+            repository().save(inventory);
+    
+            // 재고 감소 이벤트 발행
+            StockDecreased stockDecreased = new StockDecreased(inventory);
+            stockDecreased.publishAfterCommit();
         }
     }
+    
+    
     //>>> Clean Arch / Port Method
 }
 //>>> DDD / Aggregate Root

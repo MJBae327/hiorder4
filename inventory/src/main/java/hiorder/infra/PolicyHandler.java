@@ -3,9 +3,11 @@ package hiorder.infra;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import hiorder.config.kafka.KafkaProcessor;
-import hiorder.domain.*;
-import hiorder.external.MenuService;
+import hiorder.domain.Inventory;
+import hiorder.domain.InventoryRepository;
+import hiorder.domain.OrderCreated;
 import hiorder.external.MenuDto;
+import hiorder.external.MenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.StreamListener;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -31,16 +33,18 @@ public class PolicyHandler {
         value = KafkaProcessor.INPUT,
         condition = "headers['type']=='OrderCreated'"
     )
-    public void wheneverOrderCreated_DecreaseStock(
-        @Payload OrderCreated orderCreated
-    ) {
+    public void wheneverOrderCreated_DecreaseStock(@Payload OrderCreated orderCreated) {
         System.out.println("\n\n##### listener DecreaseStock : " + orderCreated + "\n\n");
 
-        // Menu 정보 가져오기
+        // OrderCreated 이벤트에서 받은 menuId를 사용하여 Menu 정보를 가져옴
         MenuDto menu = menuService.getMenu(Long.valueOf(orderCreated.getMenuId()));
 
-        // Inventory.decreaseStock 호출, 재고 감소 처리
-        Inventory.decreaseStock(orderCreated, menu.getInventoryId(), menu.getIngredientUnit());
+        if (menu != null) {
+            // Inventory의 재고를 감소시키는 메서드 호출
+            Inventory.decreaseStock(orderCreated, menu.getInventoryId(), menu.getIngredientUnit());
+        } else {
+            System.out.println("Menu information could not be retrieved for MenuId: " + orderCreated.getMenuId());
+        }
     }
 }
 //>>> Clean Arch / Inbound Adaptor
