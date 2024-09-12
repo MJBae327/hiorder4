@@ -7,7 +7,7 @@ import lombok.*;
 
 @Data
 @ToString
-public class OrderCreated extends AbstractEvent {
+public class OrderCreated2 extends AbstractEvent {
 
     private Long id;
     private Long tableId;
