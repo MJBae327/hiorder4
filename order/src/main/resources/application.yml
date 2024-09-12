@@ -89,7 +89,7 @@ api:
   url: 
     order: order:8080 
     
-
+---
 spring:
   profiles: kubernetes
   jpa:

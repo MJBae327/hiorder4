@@ -81,7 +81,7 @@ spring:
           destination: hiorder
           contentType: application/json
 
-
+---
 spring:
   profiles: kubernetes
   jpa:

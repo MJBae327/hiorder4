@@ -83,7 +83,7 @@ api:
   url:
     menu: http://gateway:8080/menus  # Docker 환경에서 게이트웨이를 통한 Menu 서비스 접근
 
-
+---
 spring:
   profiles: kubernetes
   jpa:

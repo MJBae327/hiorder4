@@ -82,7 +82,7 @@ spring:
           contentType: application/json
 
 
-
+---
 spring:
   profiles: kubernetes
   jpa:

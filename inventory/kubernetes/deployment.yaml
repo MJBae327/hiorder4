@@ -16,9 +16,6 @@ spec:
     spec:
       containers:
         - name: inventory
-          env:
-            - name: SPRING_PROFILES_ACTIVE
-              value: "kubernetes"
           image: "mjbae327/inventory:latest"
           ports:
             - containerPort: 8080
