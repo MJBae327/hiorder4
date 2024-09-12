@@ -5,7 +5,6 @@ spring:
   application:
     name: inventory
 ---
-
 spring:
   profiles: default
   jpa:
@@ -30,27 +29,25 @@ spring:
       bindings:
         event-in:
           group: inventory
-#<<< EDA / Topic Name
           destination: hiorder
-#>>> EDA / Topic Name
           contentType: application/json
         event-out:
-#<<< EDA / Topic Name
           destination: hiorder
-#>>> EDA / Topic Name
           contentType: application/json
+
+  # Menu 서비스 URL을 Gateway 경유로 설정
+api:
+  url:
+    menu: http://localhost:8088/menus  # 게이트웨이를 통해 Menu 서비스에 접근
 
 logging:
   level:
     org.hibernate.type: trace
     org.springframework.cloud: debug
 
-
 server:
   port: 8085
-
 ---
-
 spring:
   profiles: docker
   jpa:
@@ -81,7 +78,9 @@ spring:
           destination: hiorder
           contentType: application/json
 
-
+  # Docker 환경의 Menu 서비스 URL도 Gateway 경유로 설정
 api:
   url:
-    menu: http://gateway:8080/menus
+    menu: http://gateway:8080/menus  # Docker 환경에서 게이트웨이를 통한 Menu 서비스 접근
+
+
